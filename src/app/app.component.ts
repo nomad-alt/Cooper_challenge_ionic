@@ -1,10 +1,10 @@
-import {Component, ViewChild} from '@angular/core';
-import {Nav, Platform, AlertController} from 'ionic-angular';
-import {StatusBar} from '@ionic-native/status-bar';
-import {SplashScreen} from '@ionic-native/splash-screen';
-import {Angular2TokenService} from 'angular2-token';
+import { Component, ViewChild } from '@angular/core';
+import { Nav, Platform, AlertController } from 'ionic-angular';
+import { StatusBar } from '@ionic-native/status-bar';
+import { SplashScreen } from '@ionic-native/splash-screen';
+import { Angular2TokenService } from 'angular2-token';
 
-import {HomePage} from '../pages/home/home';
+import { HomePage } from '../pages/home/home';
 
 @Component({
   templateUrl: 'app.html'
@@ -14,22 +14,24 @@ export class MyApp {
 
   rootPage: any = HomePage;
 
-  pages: Array<{ title: string, component: any }>;
+  pages: Array<{title: string, component: any}>;
   currentUser: any;
 
   constructor(public platform: Platform,
               public statusBar: StatusBar,
               public splashScreen: SplashScreen,
-              private _tokenService: Angular2TokenService) {
+              public alertCtrl: AlertController,
+              private _tokenService: Angular2TokenService
+  ) {
     this._tokenService.init({
-      apiBase: 'https://ne-cooper-api.herokuapp.com//api/v1'
+      apiBase: ' https://mta-cooper-api.herokuapp.com/api/v1'
     });
 
     this.initializeApp();
 
     // used for an example of ngFor and navigation
     this.pages = [
-      {title: 'Home', component: HomePage},
+      { title: 'Home', component: HomePage },
     ];
 
   }
@@ -76,8 +78,47 @@ export class MyApp {
     confirm.present();
   }
 
+  signUpPopUp() {
+    console.log('popup');
+    let confirm = this.alertCtrl.create({
+      title: 'Sign up',
+      inputs: [
+        {
+          name: 'email',
+          placeholder: 'email'
+        },
+        {
+          name: 'password',
+          placeholder: 'password',
+          type: 'password'
+        },
+        {
+          name: 'password_confirmation',
+          placeholder: 'password confirmation',
+          type: 'password'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Sign Up',
+          handler: data => {
+            this.signUp(data);
+          }
+        }
+      ]
+    });
+    confirm.present();
+  }
+
   login(credentials) {
-    this.tokenService
+    console.log(credentials)
+    this._tokenService
       .signIn(credentials)
       .subscribe(
         res => (this.currentUser = res.json().data),
@@ -85,8 +126,18 @@ export class MyApp {
       );
   }
 
+  signUp(credentials) {
+    console.log(credentials);
+    this._tokenService
+      .registerAccount(credentials)
+      .subscribe(
+        res => (this.currentUser = res.json().data),
+        err => console.error('error')
+      );
+  }
+
   logout() {
-    this.tokenService
+    this._tokenService
       .signOut()
       .subscribe(res => console.log(res), err => console.error('error'));
     this.currentUser = undefined;
